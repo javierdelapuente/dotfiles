@@ -1,0 +1,6 @@
+.cfg
+.ssh/*
+.gnupg/*
+.authinfo
+.authinfo.gpg
+.netrc
