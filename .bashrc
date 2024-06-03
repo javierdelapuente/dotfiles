@@ -118,4 +118,16 @@ fi
 
 
 # From here on, added by javierdelapuente. The previous lines are set by default ubuntu 24.04 
-alias dotfiles='/usr/bin/git --git-dir=/home/jpuente/.cfg/ --work-tree=/home/jpuente'
+alias dotfiles='/usr/bin/git --git-dir=/home/jpuente/.dotfiles/ --work-tree=/home/jpuente'
+
+HISTSIZE=100000
+HISTFILESIZE=200000
+
+export WORKON_HOME=$HOME/.virtualenvs
+export VIRTUALENVWRAPPER_SCRIPT=/usr/share/virtualenvwrapper/virtualenvwrapper.sh
+export VIRTUALENVWRAPPER_PYTHON=/usr/bin/python3
+source /usr/share/virtualenvwrapper/virtualenvwrapper.sh
+
+if [ -d "$HOME/go/bin" ] ; then
+    PATH="$HOME/go/bin:$PATH"
+fi
