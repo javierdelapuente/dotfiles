@@ -1,5 +1,7 @@
 (setenv "PATH" (concat (getenv "PATH") ":" (expand-file-name "~/go/bin")))
+(setenv "PATH" (concat (getenv "PATH") ":" (expand-file-name "~/.local/bin")))
 (setq exec-path (append exec-path (list (expand-file-name "~/go/bin"))))
+(setq exec-path (append exec-path (list (expand-file-name "~/.local/bin"))))
 
 (require 'package)
 (add-to-list 'package-archives '("stable" . "https://stable.melpa.org/packages/") t)
@@ -153,7 +155,8 @@
 (use-package typescript-mode)
 (use-package jinja2-mode)
 (use-package apache-mode)
-
+(use-package python-black)
+  
 (use-package tox
   :config
   (setq tox-runner 'py.test)
@@ -203,7 +206,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(ox-hugo tox apache-mode jinja2-mode typescript-mode terraform-mode lsp-mode corfu pyvenv google-this which-key flycheck helm git-link forge magit ace-window markdown-mode protobuf-mode go-mode dockerfile-mode hcl-mode yaml-mode quelpa-use-package material-theme quelpa diminish)))
+   '(python-black ox-hugo tox apache-mode jinja2-mode typescript-mode terraform-mode lsp-mode corfu pyvenv google-this which-key flycheck helm git-link forge magit ace-window markdown-mode protobuf-mode go-mode dockerfile-mode hcl-mode yaml-mode quelpa-use-package material-theme quelpa diminish)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
