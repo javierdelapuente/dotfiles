@@ -200,26 +200,58 @@
 (add-to-list 'tramp-methods
 	`("multipass"
 	  (tramp-login-program      "multipass")
-	  (tramp-login-args         (;; ("-l" "%u") ("-p" "%p") ("%c") ("-e" "none")
-				     ("shell") ("%h"))
-				     ;; ("shell") ("netbox/0"))
-				    )
-	  ;; (tramp-async-args         (("-q")))
-	  ;; (tramp-direct-async       t)
-	  ;; (tramp-remote-shell       ,tramp-default-remote-shell)
+	  (tramp-login-args         (("shell") ("%h")))
 	  (tramp-remote-shell "/bin/sh")
 	  (tramp-remote-shell-login ("-l")))
 	)
 
-(add-to-list 'url-tramp-protocols "multipass")
-(tramp-set-completion-function "multipass" tramp-completion-function-alist-ssh)
+(defun tramp-multipass-parse-instance-names (_ignore)
+  ;;   "Return a list of (nil host) tuples of multipass Running instances."
+  (delq nil
+	(mapcar
+	 (lambda (line)
+	   (when (string-match
+		  (rx bol (group (+ (not ","))) "," (group (+ (not ","))) (* nonl) eol) line)
+	     (let ((host (match-string 1 line))
+		   (state (match-string 2 line))
+		   )
+	       (unless (or (string= host "Name") (not (string= state "Running")))
+	       `(,state ,host)))
+	     ))
+	 (tramp-process-lines nil "multipass" "list" "--format=csv")
+	 )
+	))
+
+(tramp-set-completion-function
+ "multipass" '((tramp-multipass-parse-instance-names "")))
+
+
+(defun remove-multipass-delete-default-host (orig-fun method)
+  ;; Trick the first element is tramp-parse-default-user-host.
+  (if (string= method "multipass")
+      (progn
+	(message "multipass")
+	(let ((res (seq-drop (funcall orig-fun method) 1)))
+	  res
+	  ))
+    (funcall orig-fun method))
+  )
+
+(advice-add 'tramp-get-completion-function :around #'remove-multipass-delete-default-host)
+
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(python-black ox-hugo tox apache-mode jinja2-mode typescript-mode terraform-mode lsp-mode corfu pyvenv google-this which-key flycheck helm git-link forge magit ace-window markdown-mode protobuf-mode go-mode dockerfile-mode hcl-mode yaml-mode quelpa-use-package material-theme quelpa diminish)))
+   '(python-black ox-hugo tox apache-mode jinja2-mode typescript-mode terraform-mode lsp-mode corfu pyvenv google-this which-key flycheck helm git-link forge magit ace-window markdown-mode protobuf-mode go-mode dockerfile-mode hcl-mode yaml-mode quelpa-use-package material-theme quelpa diminish))
+ '(safe-local-variable-values
+   '((etags-regen-ignores "test/manual/etags/")
+     (etags-regen-regexp-alist
+      (("c" "objc")
+       "/[ \11]*DEFVAR_[A-Z_ \11(]+\"\\([^\"]+\\)\"/\\1/" "/[ \11]*DEFVAR_[A-Z_ \11(]+\"[^\"]+\",[ \11]\\([A-Za-z0-9_]+\\)/\\1/")))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
