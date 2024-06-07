@@ -135,3 +135,6 @@ fi
 if [ -d "$HOME/.local/bin" ] ; then
     PATH="$HOME/.local/bin:$PATH"
 fi
+
+source /usr/share/bash-completion/completions/git
+__git_complete dotfiles __git_main
