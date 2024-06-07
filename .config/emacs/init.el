@@ -155,6 +155,9 @@
 (use-package typescript-mode)
 (use-package jinja2-mode)
 (use-package apache-mode)
+
+;; Install to the user bin with
+;; pip install --user black-macchiato --break-system-packages
 (use-package python-black)
   
 (use-package tox
