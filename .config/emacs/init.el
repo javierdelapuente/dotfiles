@@ -188,12 +188,10 @@
 ;; If there is a pyvenv environment, activate it for the shell-mode
 (add-hook 'shell-mode-hook
 	  (lambda ()
-	    (when (boundp 'pyvenv-virtual-env-name)
+	    (when (and (boundp 'pyvenv-virtual-env-name) pyvenv-virtual-env-name)
 	      ;; (shell-eval-command (format "workon %s\n" pyvenv-virtual-env-name))
-	      (shell-eval-command (format ". %s/bin/activate" pyvenv-virtual-env))
-	      (comint-send-input)
-	      )
-	    ))
+		(shell-eval-command (format ". %s/bin/activate" pyvenv-virtual-env))
+		(comint-send-input))))
 
 
 ;; Playing with multipass and tramp. TODO Have a go with autocomplete
