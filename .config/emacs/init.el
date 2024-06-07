@@ -169,6 +169,16 @@
   :after ox)
 
 ;; ==================================================
+;; Some hardcoded configuration. Look for alternatives
+;; ==================================================
+
+(add-hook 'python-mode-hook
+	  (lambda ()
+	    (setq fill-column 99)
+	    (display-fill-column-indicator-mode)
+	    ))
+
+;; ==================================================
 ;; TESTING/EXPERIMENTATION
 ;; ==================================================
 
