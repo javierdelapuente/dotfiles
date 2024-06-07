@@ -188,7 +188,7 @@
 ;; If there is a pyvenv environment, activate it for the shell-mode
 (add-hook 'shell-mode-hook
 	  (lambda ()
-	    (when (and (boundp 'pyvenv-virtual-env-name) pyvenv-virtual-env-name)
+	    (when (and (boundp 'pyvenv-virtual-env-name) pyvenv-virtual-env-name (not (file-remote-p default-directory)))
 	      ;; (shell-eval-command (format "workon %s\n" pyvenv-virtual-env-name))
 		(shell-eval-command (format ". %s/bin/activate" pyvenv-virtual-env))
 		(comint-send-input))))
@@ -225,7 +225,8 @@
 
 
 (defun remove-multipass-delete-default-host (orig-fun method)
-  ;; Trick the first element is tramp-parse-default-user-host.
+  ;; FIXME remove the first element, that is tramp-parse-default-user-host.
+  ;; It would be better to look for that fn
   (if (string= method "multipass")
       (progn
 	(message "multipass")
