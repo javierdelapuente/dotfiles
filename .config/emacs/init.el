@@ -171,6 +171,11 @@
   :pin melpa
   :after ox)
 
+
+(use-package term
+  :bind (:map term-raw-map ("C-c C-y" . term-paste)))
+
+
 ;; ==================================================
 ;; Some hardcoded configuration. Look for alternatives
 ;; ==================================================
