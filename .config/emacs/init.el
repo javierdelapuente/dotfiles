@@ -115,6 +115,9 @@
 ;; For go:
 ;; - go get golang.org/x/tools/gopls@latest
 
+;; For js:
+;; install ts-ls when queried after opening a js/ts buffer with lsp
+
 (use-package lsp-mode
   :custom
   (lsp-completion-provider :none) ;; we use Corfu!
@@ -126,6 +129,7 @@
           '(flex)))
   :hook (
          (java-mode . lsp)
+         (js-mode . lsp)
 	 (go-mode . lsp)
 	 (python-mode . lsp)
 	 (c-mode-hook . lsp)
@@ -140,6 +144,11 @@
 (add-hook 'ruby-mode-hook 'lsp)
 (add-hook 'go-mode-hook #'lsp-deferred)
 (add-hook 'go-mode-hook #'lsp-go-install-save-hooks)
+(add-hook 'js-mode-hook 'lsp)
+(with-eval-after-load 'js
+  (define-key js-mode-map (kbd "M-.") nil))
+
+
 
 (defun lsp-go-install-save-hooks ()
   (add-hook 'before-save-hook #'lsp-format-buffer t t)
@@ -238,8 +247,7 @@
 	(let ((res (seq-drop (funcall orig-fun method) 1)))
 	  res
 	  ))
-    (funcall orig-fun method))
-  )
+    (funcall orig-fun method)))
 
 (advice-add 'tramp-get-completion-function :around #'remove-multipass-delete-default-host)
 
