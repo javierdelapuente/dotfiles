@@ -40,6 +40,15 @@
 
 ;; (add-hook 'emacs-startup-hook 'toggle-frame-maximized)
 ;; (add-to-list 'default-frame-alist '(fullscreen . maximized))
+;; (when window-system (set-frame-size (selected-frame) 100 50))
+;; (add-to-list 'default-frame-alist '(width . 100))
+;; (add-to-list 'default-frame-alist '(height . 50))
+;;(setq default-frame-alist '((width . 100) (height . 50)))
+(add-hook 'after-make-frame-functions
+	  (lambda (frame)
+	    (set-frame-width frame 100)
+	    (set-frame-height frame 50)))
+
 
 (setq column-number-mode t)
 
@@ -65,6 +74,7 @@
   :defer t
   :init
   (global-set-key (kbd "M-o") 'ace-window)
+  (setq aw-scope 'frame)
   )
 
 (use-package magit
@@ -184,6 +194,12 @@
 (use-package term
   :bind (:map term-raw-map ("C-c C-y" . term-paste)))
 
+(use-package mermaid-mode
+  :config
+  (setq mermaid-mmdc-location "/usr/bin/npx")
+    ;; FIXME Will not work with org mode, as mermaid-flags are the last arguments to the program
+  (setq mermaid-flags (format "-p @mermaid-js/mermaid-cli mmdc -p %s/.config/emacs/puppeteer-config.json" (getenv "HOME")))
+  )
 
 ;; ==================================================
 ;; Some hardcoded configuration. Look for alternatives
@@ -258,7 +274,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(python-black ox-hugo tox apache-mode jinja2-mode typescript-mode terraform-mode lsp-mode corfu pyvenv google-this which-key flycheck helm git-link forge magit ace-window markdown-mode protobuf-mode go-mode dockerfile-mode hcl-mode yaml-mode quelpa-use-package material-theme quelpa diminish))
+   '(mermaid-mode python-black ox-hugo tox apache-mode jinja2-mode typescript-mode terraform-mode lsp-mode corfu pyvenv google-this which-key flycheck helm git-link forge magit ace-window markdown-mode protobuf-mode go-mode dockerfile-mode hcl-mode yaml-mode quelpa-use-package material-theme quelpa diminish))
  '(safe-local-variable-values
    '((etags-regen-ignores "test/manual/etags/")
      (etags-regen-regexp-alist
