@@ -54,6 +54,9 @@
 
 (setq dired-dwim-target t)
 
+(setq ring-bell-function 'ignore)
+;; (setq visible-bell 1)
+
 ;; ==================================================
 ;; Package Main Configuration
 ;; ==================================================
