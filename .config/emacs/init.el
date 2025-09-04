@@ -200,7 +200,7 @@
 
 (use-package python-pytest)
 ;; https://gist.githubusercontent.com/grafov/10985431/raw/dcd12037308446179f26f7d2ab2c034a1e995d2e/go-template-mode.el
-(use-package go-template-mode   :ensure nil  :load-path "~/.config/emacs/go-template-mode.el")
+;; (use-package go-template-mode   :ensure nil  :load-path "~/.config/emacs/go-template-mode.el")
 
 
 (use-package mermaid-mode
@@ -217,7 +217,7 @@
 (use-package dap-mode
   :config
   (require 'dap-dlv-go)
-  (dap-auto-configure-features t)
+  ;;(dap-auto-configure-features t)
   )
 
 
@@ -297,17 +297,15 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(org-src-preserve-indentation t)
- '(package-selected-packages
-   '(dap-mod dap-mode dap-dlv-go python-pytest mermaid-mode python-black ox-hugo tox apache-mode jinja2-mode typescript-mode terraform-mode lsp-mode corfu pyvenv google-this which-key flycheck helm git-link forge magit ace-window markdown-mode protobuf-mode go-mode dockerfile-mode hcl-mode yaml-mode quelpa-use-package material-theme quelpa diminish))
+ '(package-selected-packages nil)
  '(safe-local-variable-values
-   '((eval set
-	   (make-local-variable 'flycheck-go-build-tags)
+   '((eval set (make-local-variable 'flycheck-go-build-tags)
 	   '("libsqlite3"))
      (go-test-args . "-tags libsqlite3 -timeout 120s")
      (etags-regen-ignores "test/manual/etags/")
      (etags-regen-regexp-alist
-      (("c" "objc")
-       "/[ \11]*DEFVAR_[A-Z_ \11(]+\"\\([^\"]+\\)\"/\\1/" "/[ \11]*DEFVAR_[A-Z_ \11(]+\"[^\"]+\",[ \11]\\([A-Za-z0-9_]+\\)/\\1/"))))
+      (("c" "objc") "/[ \11]*DEFVAR_[A-Z_ \11(]+\"\\([^\"]+\\)\"/\\1/"
+       "/[ \11]*DEFVAR_[A-Z_ \11(]+\"[^\"]+\",[ \11]\\([A-Za-z0-9_]+\\)/\\1/"))))
  '(warning-suppress-types '((use-package))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
