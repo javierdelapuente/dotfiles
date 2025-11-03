@@ -118,7 +118,7 @@ fi
 
 
 # From here on, added by javierdelapuente. The previous lines are set by default ubuntu 24.04 
-alias dotfiles='/usr/bin/git --git-dir=/home/jpuente/.dotfiles/ --work-tree=/home/jpuente'
+alias dotfiles='/usr/bin/git --git-dir="${HOME}/.dotfiles/" --work-tree="${HOME}"'
 
 HISTSIZE=100000
 HISTFILESIZE=200000

@@ -57,6 +57,10 @@
 (setq ring-bell-function 'ignore)
 ;; (setq visible-bell 1)
 
+(setq dired-listing-switches "-alhn")
+;; default is "-al"
+
+
 ;; ==================================================
 ;; Package Main Configuration
 ;; ==================================================
