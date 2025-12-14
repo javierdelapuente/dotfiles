@@ -1,0 +1,6 @@
+.dotfiles
+.ssh/*
+.gnupg/*
+.authinfo
+.authinfo.gpg
+.netrc
