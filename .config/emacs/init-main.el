@@ -175,61 +175,125 @@ This function can be called interactively or from Lisp."
   (setf (alist-get "s" org-structure-template-alist nil nil #'string=) "src emacs-lisp")
   )
 
-(use-package visual-fill-column)
-(defun dw/org-present-prepare-slide ()
-  (org-overview)
-  (org-show-entry)
-  (org-show-children))
+;; Load org-faces to make sure we can set appropriate faces
+  (require 'org-faces)
+  (setq org-hide-emphasis-markers t)
 
-(defun dw/org-present-hook ()
-  (setq-local face-remapping-alist '((default (:height 1.5) variable-pitch)
-                                     (header-line (:height 4.5) variable-pitch)
-                                     (org-document-title (:height 1.75) org-document-title)
-                                     (org-code (:height 1.55) org-code)
-                                     (org-verbatim (:height 1.55) org-verbatim)
-                                     (org-block (:height 1.25) org-block)
-                                     (org-block-begin-line (:height 0.7) org-block)))
-  (setq
-   ;; visual-fill-column-width 110
-   visual-fill-column-center-text t
-   )
-  (visual-fill-column-mode 1)
-  (setq header-line-format " ")
-  ;; (org-appear-mode -1)
-  (org-display-inline-images)
-  (dw/org-present-prepare-slide)
-  ;; (dw/kill-panel)
-  )
+  ;; Set reusable font name variables
+  (defvar my/fixed-width-font "Ubuntu Monospace"
+    "The font to use for monospaced (fixed width) text.")
 
-(defun dw/org-present-quit-hook ()
-  ;;(setq-local face-remapping-alist '((default variable-pitch default)))
-  (setq-local face-remapping-alist nil)
-  (setq header-line-format nil)
-  (org-present-small)
-  (org-remove-inline-images)
-  (visual-fill-column-mode 0)
-  ;; (org-appear-mode 1)
-  ;; (dw/start-panel)
-  )
+  (defvar my/variable-width-font "Ubuntu"
+    "The font to use for variable-pitch (document) text.")
 
-(defun dw/org-present-prev ()
-  (interactive)
-  (org-present-prev)
-  (dw/org-present-prepare-slide))
+  ;; NOTE: These settings might not be ideal for your machine, tweak them as needed!
+  ;; (set-face-attribute 'default nil :font my/fixed-width-font :weight 'light :height 180)
+  ;; (set-face-attribute 'fixed-pitch nil :font my/fixed-width-font :weight 'light :height 190)
+  ;; (set-face-attribute 'variable-pitch nil :font my/variable-width-font :weight 'light :height 1.3)
 
-(defun dw/org-present-next ()
-  (interactive)
-  (org-present-next)
-  (dw/org-present-prepare-slide))
+  ;; (dolist (face '((org-level-1 . 1.2)
+  ;;                 (org-level-2 . 1.1)
+  ;;                 (org-level-3 . 1.05)
+  ;;                 (org-level-4 . 1.0)
+  ;;                 (org-level-5 . 1.1)
+  ;;                 (org-level-6 . 1.1)
+  ;;                 (org-level-7 . 1.1)
+  ;;                 (org-level-8 . 1.1)))
+  ;;   (set-face-attribute (car face) nil :font my/variable-width-font :weight 'medium :height (cdr face)))
 
-(use-package org-present
-  :bind
-  (:map org-present-mode-keymap
-        ("C-c C-j" . dw/org-present-next)
-        ("C-c C-k" . dw/org-present-prev))
-  :hook
-  ((org-present-mode . dw/org-present-hook)
-   (org-present-mode-quit . dw/org-present-quit-hook)) )
+  ;; ;; Make the document title a bit bigger
+  ;; (set-face-attribute 'org-document-title nil :font my/variable-width-font :weight 'bold :height 1.3)
+
+  ;; ;; Make sure certain org faces use the fixed-pitch face when variable-pitch-mode is on
+  ;; (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch)
+  ;; (set-face-attribute 'org-table nil :inherit 'fixed-pitch)
+  ;; (set-face-attribute 'org-formula nil :inherit 'fixed-pitch)
+  ;; (set-face-attribute 'org-code nil :inherit '(shadow fixed-pitch))
+  ;; (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
+  ;; (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
+  ;; (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
+  ;; (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch)
+
+
+  (use-package visual-fill-column)
+  (defun dw/org-present-prepare-slide ()
+    (org-overview)
+    (org-show-entry)
+    (org-show-children))
+
+  ;; Set reusable font name variables
+(defvar my/fixed-width-font "Ubuntu Monospace"
+  "The font to use for monospaced (fixed width) text.")
+
+(defvar my/variable-width-font "Ubuntu"
+  "The font to use for variable-pitch (document) text.")
+
+  (defun dw/org-present-hook ()
+  (setq-local face-remapping-alist
+              '((default (:weight light :height 180))
+		(fixed-pitch (:weight light :height 190))
+		(variable-pitch (:weight light :height 190))
+		(header-line (:height 4 :inherit header-line) variable-pitch)
+                (org-level-1 (:inherit org-level-1 :weight bold :height 1.2))
+                (org-level-2 (:inherit org-level-2 :weight bold :height 1.1))
+                (org-level-3 (:inherit org-level-3 :weight normal :height 1.05))
+                (org-level-4 (:inherit org-level-4 :weight normal :height 1.0))
+                (org-level-5 (:inherit org-level-5 :weight normal))
+                (org-level-6 (:inherit org-level-6 :weight normal))
+                (org-level-7 (:inherit org-level-7 :weight normal))
+                (org-level-8 (:inherit org-level-8 :weight normal))
+                (org-block (:inherit (org-block fixed-pitch)))
+                (org-block-begin-line (:inherit (org-block-begin-line fixed-pitch)))
+                (org-checkbox (:inherit (org-checkbox fixed-pitch)))
+                (org-code (:inherit (org-code fixed-pitch)))
+                (org-document-title (:inherit org-document-title :weight bold :height 1.3))
+                (org-formula (:inherit (org-formula fixed-pitch)))
+                (org-meta-line (:inherit (org-meta-line fixed-pitch)))
+                (org-special-keyword (:inherit (org-special-keyword fixed-pitch)))
+                (org-table (:inherit (org-table fixed-pitch)))
+                (org-verbatim (:inherit '(org-verbatim shadow fixed-pitch)))
+  	      ))
+    (setq
+     ;; visual-fill-column-width 110
+     visual-fill-column-center-text t
+     )
+    (visual-fill-column-mode 1)
+    (setq header-line-format " ")
+    ;; (org-appear-mode -1)
+    (org-display-inline-images)
+    (dw/org-present-prepare-slide)
+    ;; (dw/kill-panel)
+    )
+
+  (defun dw/org-present-quit-hook ()
+    ;;(setq-local face-remapping-alist '((default variable-pitch default)))
+    (setq-local face-remapping-alist nil)
+    (setq header-line-format nil)
+    (org-present-small)
+    (org-remove-inline-images)
+    (visual-fill-column-mode 0)
+    ;; (org-appear-mode 1)
+    ;; (dw/start-panel)
+    )
+
+  (defun dw/org-present-prev ()
+    (interactive)
+    (org-present-prev)
+    (dw/org-present-prepare-slide))
+
+  (defun dw/org-present-next ()
+    (interactive)
+    (org-present-next)
+    (dw/org-present-prepare-slide))
+
+  (use-package org-present
+    :bind
+    (:map org-present-mode-keymap
+          ("C-c C-j" . dw/org-present-next)
+          ("C-c C-k" . dw/org-present-prev))
+    :hook
+    ((org-present-mode . dw/org-present-hook)
+     (org-present-mode-quit . dw/org-present-quit-hook)) )
 
 ;; We need this to use npx with nvm (for the mcp) 
 (use-package nvm
