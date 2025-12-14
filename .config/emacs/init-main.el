@@ -164,17 +164,6 @@ This function can be called interactively or from Lisp."
   (setf (alist-get "s" org-structure-template-alist nil nil #'string=) "src emacs-lisp")
   )
 
-(defconst llm-tools-dir
-  (expand-file-name "llm-tool-collection/" user-emacs-directory)
-  "Path to the llm-tool-collection repository.")
-
-(require 'vc-git)
-(unless (file-directory-p llm-tools-dir)
-  (vc-git-clone "https://github.com/skissue/llm-tool-collection.git" llm-tools-dir "main"))
-(when (file-exists-p (expand-file-name "llm-tool-collection.el" llm-tools-dir))
-  (add-to-list 'load-path llm-tools-dir)
-  (require 'llm-tool-collection))
-
 (use-package gptel
   :ensure t
   :config
@@ -225,6 +214,19 @@ This function can be called interactively or from Lisp."
   )
 
 (gptel-mcp-connect '("duckduckgo" "fetch"))
+
+(defconst llm-tools-dir
+  (expand-file-name "llm-tool-collection/" user-emacs-directory)
+  "Path to the llm-tool-collection repository.")
+
+(require 'vc-git)
+(unless (file-directory-p llm-tools-dir)
+  (vc-git-clone "https://github.com/skissue/llm-tool-collection.git" llm-tools-dir "main"))
+(when (file-exists-p (expand-file-name "llm-tool-collection.el" llm-tools-dir))
+  (add-to-list 'load-path llm-tools-dir)
+  (require 'llm-tool-collection))
+
+(apply #'gptel-make-tool llm-tc/bash)
 
 (defun org-babel-tangle-config ()
   (when (string-equal (buffer-file-name)
