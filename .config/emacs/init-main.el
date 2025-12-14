@@ -188,23 +188,20 @@ This function can be called interactively or from Lisp."
    `(
      ("duckduckgo" . (:command "uvx" :args ("duckduckgo-mcp-server")))
      ("fetch" . (:command "uvx" :args ("mcp-server-fetch")))
+     ("filesystem" . (:command "npx" :args ("-y" "@modelcontextprotocol/server-filesystem")
+      			       :roots ("/home/jpuente/github/")))
+     ;; ("sequential-thinking" . (:command "npx" :args ("-y" "@modelcontextprotocol/server-sequential-thinking")))
+     ;; ("memory" . (:command "npx" :args ("-y" "@modelcontextprotocol/server-memory")))
      ;; ("github" . (:command "docker"
      ;;              :args ("run" "-i" "--rm"
      ;;                     "-e" "GITHUB_PERSONAL_ACCESS_TOKEN"
      ;;                     "ghcr.io/github/github-mcp-server")
      ;;              :env (:GITHUB_PERSONAL_ACCESS_TOKEN ,(get-sops-secret-value "gh_pat_mcp"))))
-     ("filesystem" . (:command "npx" 
-      			       :args ("-y" "@modelcontextprotocol/server-filesystem")
-      			       :roots ("/home/jpuente/github/")))
-     ("sequential-thinking" . (:command "npx" :args ("-y" "@modelcontextprotocol/server-sequential-thinking")))
-     ("context7" . (:command "npx" :args ("-y" "@upstash/context7-mcp") :env (:DEFAULT_MINIMUM_TOKENS "6000")))
+     ;; ("context7" . (:command "npx" :args ("-y" "@upstash/context7-mcp") :env (:DEFAULT_MINIMUM_TOKENS "6000")))
      ))
   (require 'mcp-hub)
-  :hook (after-init . mcp-hub-start-all-server)
+  ;;:hook (after-init . mcp-hub-start-all-server)
   )
-
-;; This is very slow
-(mcp-hub-start-all-server nil nil t)
 
 (use-package gptel
   :ensure t
@@ -214,9 +211,9 @@ This function can be called interactively or from Lisp."
         gptel-expert-commands t
         gptel-track-media t
         gptel-include-reasoning 'ignore
-        gptel-model 'gpt-4.1 ;; "gpt-4.1"
+        gptel-model 'gpt-4.1
         gptel-log-level 'info
-      	;; gptel-include-tool-results t
+	;; gptel-include-tool-results t
         gptel-backend (gptel-make-gh-copilot "Copilot"))
   (require 'gptel)
   (require 'gptel-integrations)
@@ -225,30 +222,18 @@ This function can be called interactively or from Lisp."
             (lambda ()
               (local-unset-key (kbd "C-c RET"))))
   (apply #'gptel-make-tool llm-tc/bash)
-  (gptel-make-preset 'development
-    :description "AI coding assistant with filesystem and bash"
-    :system "You are an expert programming assistant with access to the filesystem and shell commands."
-    :model 'claude-sonnet-4.5
-    :pre (lambda () (gptel-mcp-connect '("duckduckgo" "fetch")))
-    :tools '("bash" "mcp-duckduckgo" "mcp-fetch")
-    )
-  (gptel--apply-preset 'development)
+  ;; let the thing connect to duckduckgo and fetch.
+  (gptel-mcp-connect '("duckduckgo" "fetch"))
   )
 
-
-
-;; (gptel-mcp-connect '("duckduckgo" "fetch"))
-
-;; (apply #'gptel-make-tool llm-tc/bash)
-
-;; (gptel-make-preset 'development
-;;   :description "AI coding assistant with filesystem and bash"
-;;   :system "You are an expert programming assistant with access to the filesystem and shell commands."
-;;   :model 'claude-sonnet-4.5
-;;   :pre (lambda () (gptel-mcp-connect '("duckduckgo" "fetch")))
-;;   :tools '("bash" "mcp-duckduckgo" "mcp-fetch")
-;;   )
-;; (gptel--apply-preset 'development)
+(gptel-make-preset 'dev
+  :description "AI coding assistant with filesystem and bash"
+  :system "You are an expert programming assistant with access to the filesystem and shell commands."
+  :model 'claude-sonnet-4.5
+  :pre (lambda () (gptel-mcp-connect '("duckduckgo" "fetch") t))
+  :tools '("bash" "mcp-duckduckgo" "mcp-fetch")
+  )
+;; (gptel--apply-preset 'dev)
 
 (use-package ace-window
 :defer t
