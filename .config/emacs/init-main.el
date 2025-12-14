@@ -16,6 +16,7 @@
 (straight-use-package 'use-package)
 (straight-use-package 'project)
 (setq straight-use-package-by-default t)
+(use-package quelpa-use-package)
 
 (setq inhibit-startup-message t)    ;; Hide the startup message
 
@@ -128,16 +129,27 @@
 (use-package gptel
   :ensure t
   :config
-  (setq  gptel-default-mode 'org-mode
-  	 gptel-expert-commands t
-  	 gptel-track-media t
-  	 gptel-include-reasoning 'ignore
-  	 gptel-model 'gpt-4.1 ;; "gpt-4.1"
-  	 gptel-log-level 'info
-	 gptel-include-tool-results t
-  	 gptel-backend (gptel-make-gh-copilot "Copilot"))
+  (setq gptel-default-mode 'org-mode
+    	gptel-expert-commands t
+    	gptel-track-media t
+    	gptel-include-reasoning 'ignore
+    	gptel-model 'gpt-4.1 ;; "gpt-4.1"
+    	gptel-log-level 'info
+  	;; gptel-include-tool-results t
+    	gptel-backend (gptel-make-gh-copilot "Copilot"))
   (require 'gptel)
-  (require 'gptel-integrations))
+  (require 'gptel-integrations)
+  (global-set-key (kbd "C-c RET") #'gptel-send)
+  (add-hook 'org-mode-hook
+            (lambda ()
+              (local-unset-key (kbd "C-c RET"))))
+  )
+
+;; We need this to use npx with nvm (for the mcp) 
+(use-package nvm
+  :straight (:host github :repo "rejeep/nvm.el")
+  :config
+  (nvm-use "v25.2.1"))
 
 (use-package mcp
   :ensure t
@@ -154,8 +166,8 @@
      ;;              :env (:GITHUB_PERSONAL_ACCESS_TOKEN ,(get-sops-secret-value "gh_pat_mcp"))))
      ;; ("nixos" . (:command "uvx" :args ("mcp-nixos")))
      ("filesystem" . (:command "npx" 
-			       :args ("-y" "@modelcontextprotocol/server-filesystem")
-			       :roots ("/home/jpuente/github/")))
+  			       :args ("-y" "@modelcontextprotocol/server-filesystem")
+  			       :roots ("/home/jpuente/github/")))
      ;;("sequential-thinking" . (:command "npx" :args ("-y" "@modelcontextprotocol/server-sequential-thinking")))
      ;; ("context7" . (:command "npx" :args ("-y" "@upstash/context7-mcp") :env (:DEFAULT_MINIMUM_TOKENS "6000")))
      ))
