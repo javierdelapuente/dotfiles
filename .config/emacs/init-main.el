@@ -82,19 +82,68 @@
 ;; look for the reference for this:
 ;; tox --devenv .venv -e integration
 ;; echo "$(pwd)/lib" > $(pwd)/.venv/lib/python3.12/site-packages/custom_path.pth
-(defun dd/python-init ()
+(defun dd/python-init-venv ()
+  "Initialize python project environment.
+This function can be called interactively or from Lisp."
+  (interactive)
   (let* ((project (project-current))
          (project-root (when project (project-root project)))
          (venv-path (when project-root
                       (expand-file-name ".venv" project-root))))
     (when (and venv-path (file-directory-p venv-path))
       (make-local-variable 'pyvenv-virtual-env)
-      (pyvenv-activate venv-path))
+      (pyvenv-activate venv-path)
+      (shell-command "uv pip install ty"))
     ))
-(add-hook 'python-base-mode-hook #'dd/python-init)
+(add-hook 'python-base-mode-hook #'dd/python-init-venv)
 (add-to-list 'eglot-server-programs
              `(python-base-mode
                . ,(eglot-alternatives '(("ty" "server")))))
+
+
+(defun dd/tox-create-venv-with-ty ()
+  "Interactively select a tox environment, create a venv with tox, and install ty."
+  (interactive)
+  (let* ((default-directory (or (when (fboundp 'project-root)
+                                  (project-root (project-current)))
+                                (when (bound-and-true-p projectile-project-root)
+                                  (projectile-project-root))
+                                default-directory))
+         (envs (split-string
+                (with-temp-buffer
+                  (if (= 0 (call-process "tox" nil t nil "list" "--no-list-dependencies" "--no-desc"))
+                      (buffer-string)
+                    (user-error "Could not list tox environments!")))
+                "\n" t))
+         (env (completing-read "Choose tox env: " envs)))
+    (async-shell-command
+     (format "tox --devenv .venv -e %s && uv pip install ty" env)
+     "*tox devenv*")))
+
+(defun dd/add-pth-to-pyvenv (dir)
+  "Add DIR as a .pth file to the site-packages of the current pyvenv environment (Unix only)."
+  (interactive "DDirectory to add to venv Python path (as .pth): ")
+  (unless (and (boundp 'pyvenv-virtual-env) pyvenv-virtual-env)
+    (user-error "No pyvenv environment is currently active"))
+  (let* ((venv-root (expand-file-name pyvenv-virtual-env))
+         (lib-dir (expand-file-name "lib" venv-root))
+         (py-dirs (when (file-directory-p lib-dir)
+                    (directory-files lib-dir t "^python[0-9.]+$")))
+         (site-packages
+          (car (delq nil
+                     (mapcar (lambda (py-dir)
+                               (let ((sp (expand-file-name "site-packages" py-dir)))
+                                 (and (file-directory-p sp) sp)))
+                             py-dirs))))
+         (pth-file (expand-file-name
+                    (format "emacs-added.pth"
+                            (file-name-nondirectory (directory-file-name dir)))
+                    site-packages)))
+    (unless site-packages
+      (error "Could not locate site-packages in venv: %s" venv-root))
+    (write-region
+     (concat (expand-file-name dir) "\n") nil pth-file 'append)
+    (message "Added .pth file: %s" pth-file)))
 
 (use-package magit
   :bind ("C-x g" . magit-status))
