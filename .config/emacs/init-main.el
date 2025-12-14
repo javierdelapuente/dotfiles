@@ -168,13 +168,13 @@ This function can be called interactively or from Lisp."
   :ensure t
   :config
   (setq gptel-default-mode 'org-mode
-    	gptel-expert-commands t
-    	gptel-track-media t
-    	gptel-include-reasoning 'ignore
-    	gptel-model 'gpt-4.1 ;; "gpt-4.1"
-    	gptel-log-level 'info
-  	;; gptel-include-tool-results t
-    	gptel-backend (gptel-make-gh-copilot "Copilot"))
+      	gptel-expert-commands t
+      	gptel-track-media t
+      	gptel-include-reasoning 'ignore
+      	gptel-model 'gpt-4.1 ;; "gpt-4.1"
+      	gptel-log-level 'info
+    	;; gptel-include-tool-results t
+      	gptel-backend (gptel-make-gh-copilot "Copilot"))
   (require 'gptel)
   (require 'gptel-integrations)
   (global-set-key (kbd "C-c RET") #'gptel-send)
@@ -202,12 +202,11 @@ This function can be called interactively or from Lisp."
      ;;                     "-e" "GITHUB_PERSONAL_ACCESS_TOKEN"
      ;;                     "ghcr.io/github/github-mcp-server")
      ;;              :env (:GITHUB_PERSONAL_ACCESS_TOKEN ,(get-sops-secret-value "gh_pat_mcp"))))
-     ;; ("nixos" . (:command "uvx" :args ("mcp-nixos")))
      ("filesystem" . (:command "npx" 
-  			       :args ("-y" "@modelcontextprotocol/server-filesystem")
-  			       :roots ("/home/jpuente/github/")))
-     ;;("sequential-thinking" . (:command "npx" :args ("-y" "@modelcontextprotocol/server-sequential-thinking")))
-     ;; ("context7" . (:command "npx" :args ("-y" "@upstash/context7-mcp") :env (:DEFAULT_MINIMUM_TOKENS "6000")))
+    			       :args ("-y" "@modelcontextprotocol/server-filesystem")
+    			       :roots ("/home/jpuente/github/")))
+     ("sequential-thinking" . (:command "npx" :args ("-y" "@modelcontextprotocol/server-sequential-thinking")))
+     ("context7" . (:command "npx" :args ("-y" "@upstash/context7-mcp") :env (:DEFAULT_MINIMUM_TOKENS "6000")))
      ))
   (require 'mcp-hub)
   :hook (after-init . mcp-hub-start-all-server)
@@ -227,6 +226,14 @@ This function can be called interactively or from Lisp."
   (require 'llm-tool-collection))
 
 (apply #'gptel-make-tool llm-tc/bash)
+
+(gptel-make-preset 'development
+  :description "AI coding assistant with filesystem and bash"
+  :system "You are an expert programming assistant with access to the filesystem and shell commands."
+  :model 'claude-sonnet-4.5
+  :pre (lambda () (gptel-mcp-connect '("duckduckgo" "fetch")))
+  :tools '("bash" "mcp-duckduckgo" "mcp-fetch")
+  )
 
 (defun org-babel-tangle-config ()
   (when (string-equal (buffer-file-name)
