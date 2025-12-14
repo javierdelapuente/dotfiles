@@ -1,3 +1,13 @@
+(defun org-babel-tangle-config ()
+  (when (string-equal (buffer-file-name)
+		      (expand-file-name "init-main.org" user-emacs-directory))
+    (let ((org-config-babel-evaluate nil))
+      (org-babel-tangle))))
+
+(add-hook 'org-mode-hook
+	  (lambda ()
+	    (add-hook 'after-save-hook #'org-babel-tangle-config)))
+
 (defvar bootstrap-version)
 (let ((bootstrap-file
        (expand-file-name
@@ -18,6 +28,7 @@
 (setq straight-use-package-by-default t)
 (use-package quelpa-use-package)
 
+(setq use-short-answers t)
 (setq inhibit-startup-message t)    ;; Hide the startup message
 
 (use-package material-theme)
@@ -35,9 +46,9 @@
 ;; (add-to-list 'default-frame-alist '(height . 50))
 ;;(setq default-frame-alist '((width . 100) (height . 50)))
 (add-hook 'after-make-frame-functions
-    	  (lambda (frame)
-    	    (set-frame-width frame 100)
-    	    (set-frame-height frame 50)))
+      	  (lambda (frame)
+      	    (set-frame-width frame 100)
+      	    (set-frame-height frame 50)))
 
 (setq column-number-mode t)
 
@@ -164,6 +175,62 @@ This function can be called interactively or from Lisp."
   (setf (alist-get "s" org-structure-template-alist nil nil #'string=) "src emacs-lisp")
   )
 
+(use-package visual-fill-column)
+(defun dw/org-present-prepare-slide ()
+  (org-overview)
+  (org-show-entry)
+  (org-show-children))
+
+(defun dw/org-present-hook ()
+  (setq-local face-remapping-alist '((default (:height 1.5) variable-pitch)
+                                     (header-line (:height 4.5) variable-pitch)
+                                     (org-document-title (:height 1.75) org-document-title)
+                                     (org-code (:height 1.55) org-code)
+                                     (org-verbatim (:height 1.55) org-verbatim)
+                                     (org-block (:height 1.25) org-block)
+                                     (org-block-begin-line (:height 0.7) org-block)))
+  (setq
+   ;; visual-fill-column-width 110
+   visual-fill-column-center-text t
+   )
+  (visual-fill-column-mode 1)
+  (setq header-line-format " ")
+  ;; (org-appear-mode -1)
+  (org-display-inline-images)
+  (dw/org-present-prepare-slide)
+  ;; (dw/kill-panel)
+  )
+
+(defun dw/org-present-quit-hook ()
+  ;;(setq-local face-remapping-alist '((default variable-pitch default)))
+  (setq-local face-remapping-alist nil)
+  (setq header-line-format nil)
+  (org-present-small)
+  (org-remove-inline-images)
+  (visual-fill-column-mode 0)
+  ;; (org-appear-mode 1)
+  ;; (dw/start-panel)
+  )
+
+(defun dw/org-present-prev ()
+  (interactive)
+  (org-present-prev)
+  (dw/org-present-prepare-slide))
+
+(defun dw/org-present-next ()
+  (interactive)
+  (org-present-next)
+  (dw/org-present-prepare-slide))
+
+(use-package org-present
+  :bind
+  (:map org-present-mode-keymap
+        ("C-c C-j" . dw/org-present-next)
+        ("C-c C-k" . dw/org-present-prev))
+  :hook
+  ((org-present-mode . dw/org-present-hook)
+   (org-present-mode-quit . dw/org-present-quit-hook)) )
+
 ;; We need this to use npx with nvm (for the mcp) 
 (use-package nvm
   :straight (:host github :repo "rejeep/nvm.el")
@@ -246,13 +313,3 @@ This function can be called interactively or from Lisp."
 :ensure t
 :config
 (google-this-mode 1))
-
-(defun org-babel-tangle-config ()
-  (when (string-equal (buffer-file-name)
-		      (expand-file-name "init-main.org" user-emacs-directory))
-    (let ((org-config-babel-evaluate nil))
-      (org-babel-tangle))))
-
-(add-hook 'org-mode-hook
-	  (lambda ()
-	    (add-hook 'after-save-hook #'org-babel-tangle-config)))
