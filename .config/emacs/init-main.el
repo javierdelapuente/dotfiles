@@ -95,7 +95,7 @@
 ;; echo "$(pwd)/lib" > $(pwd)/.venv/lib/python3.12/site-packages/custom_path.pth
 (defun dd/python-init-venv ()
   "Initialize python project environment.
-This function can be called interactively or from Lisp."
+  This function can be called interactively or from Lisp."
   (interactive)
   (let* ((project (project-current))
          (project-root (when project (project-root project)))
@@ -104,13 +104,15 @@ This function can be called interactively or from Lisp."
     (when (and venv-path (file-directory-p venv-path))
       (make-local-variable 'pyvenv-virtual-env)
       (pyvenv-activate venv-path)
-      (shell-command "uv pip install ty"))
+      (shell-command "uv pip install ty")
+      )
     ))
-(add-hook 'python-base-mode-hook #'dd/python-init-venv)
 (add-to-list 'eglot-server-programs
              `(python-base-mode
                . ,(eglot-alternatives '(("ty" "server")))))
-
+;; This will break in several cases, but I cannot advice correctly 
+;; the eglot function. Pending to investigate more. 
+(add-hook 'python-base-mode-hook #'dd/python-init-venv)
 
 (defun dd/tox-create-venv-with-ty ()
   "Interactively select a tox environment, create a venv with tox, and install ty."
@@ -158,7 +160,7 @@ This function can be called interactively or from Lisp."
 
 (use-package treesit-auto
   :config
-  (treesit-auto-add-to-auto-mode-alist 'all))
+  (global-treesit-auto-mode))
 
 (use-package magit
   :bind ("C-x g" . magit-status))
