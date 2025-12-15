@@ -156,6 +156,10 @@ This function can be called interactively or from Lisp."
      (concat (expand-file-name dir) "\n") nil pth-file 'append)
     (message "Added .pth file: %s" pth-file)))
 
+(use-package treesit-auto
+  :config
+  (treesit-auto-add-to-auto-mode-alist 'all))
+
 (use-package magit
   :bind ("C-x g" . magit-status))
 
@@ -408,3 +412,58 @@ This function can be called interactively or from Lisp."
 :ensure t
 :config
 (google-this-mode 1))
+
+(use-package vertico
+  :custom
+  (vertico-count 20)  ;; limit to a fixed size
+  :bind (:map vertico-map
+    	      ;; Use page-up/down to scroll vertico buffer, like ivy does by default.
+    	      ("<prior>" . 'vertico-scroll-down)
+    	      ("<next>"  . 'vertico-scroll-up)
+    	      ("DEL" . vertico-directory-delete-char))
+  :init
+  ;; Activate vertico
+  (vertico-mode)
+  :config
+  (require 'vertico-directory)
+  )
+
+(use-package orderless
+  :custom
+  ;; Activate orderless completion
+  (completion-styles '(orderless basic))
+  ;; Enable partial completion for file wildcard support
+  (completion-category-overrides '((file (styles partial-completion)))))
+
+(use-package consult
+  :custom
+  ;; Disable preview
+  (consult-preview-key nil)
+  :bind
+  (("C-x b" . 'consult-buffer)    ;; Switch buffer, including recentf and bookmarks
+   ("M-l"   . 'consult-git-grep)  ;; Search inside a project
+   ("M-y"   . 'consult-yank-pop)  ;; Paste by selecting the kill-ring
+   ("M-s"   . 'consult-line)      ;; Search current buffer, like swiper
+   ))
+
+(use-package embark
+  :bind
+  (("C-."   . embark-act)         ;; Begin the embark process
+   ("C-;"   . embark-dwim)        ;; good alternative: M-.
+   ("C-h B" . embark-bindings)) ;; alternative for `describe-bindings'
+  )
+
+(use-package embark-consult
+  :hook
+  (embark-collect-mode . consult-preview-at-point-mode))
+
+;; Completion: Corfu
+(use-package corfu
+  ;;:after eglot
+  :ensure t
+  :custom
+  (corfu-auto t)
+  (corfu-cycle t)
+  (corfu-quit-no-match t)
+  :config
+  (global-corfu-mode))
