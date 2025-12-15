@@ -172,7 +172,7 @@ This function can be called interactively or from Lisp."
   :hook
   (org-mode . visual-line-mode)
   :config
-  (setf (alist-get "s" org-structure-template-alist nil nil #'string=) "src emacs-lisp")
+  (setf (alist-get "S" org-structure-template-alist nil nil #'string=) "src emacs-lisp")
   )
 
 ;; Load org-faces to make sure we can set appropriate faces
@@ -294,6 +294,37 @@ This function can be called interactively or from Lisp."
     :hook
     ((org-present-mode . dw/org-present-hook)
      (org-present-mode-quit . dw/org-present-quit-hook)) )
+
+(defun dd/org-babel-send-src-to-repl (buffer-name)
+  "Execute current org src block in named shell or ansi-term buffer."
+  (interactive
+   (list (completing-read "Shell/term buffer name: "
+                          (mapcar #'buffer-name
+                                  (seq-filter
+                                   (lambda (buf)
+                                     (with-current-buffer buf
+                                       (memq major-mode '(shell-mode term-mode))))
+                                   (buffer-list)))
+                          nil t)))
+  (let ((body (string-trim-right 
+               (org-element-property :value (org-element-at-point)))))
+    (with-current-buffer buffer-name
+      (goto-char (point-max))
+      (cond
+       ;; Handle shell-mode (comint-based)
+       ((eq major-mode 'shell-mode)
+        (insert body)
+        (comint-send-input))
+       
+       ;; Handle term-mode (ansi-term)
+       ((eq major-mode 'term-mode)
+        (if (term-in-line-mode)
+            ;; In line mode, we can use term-send-input like comint
+            (progn
+              (term-send-raw-string body)
+              (term-send-input))
+          ;; In char mode, send raw string with newline
+          (term-send-raw-string (concat body "\n"))))))))
 
 ;; We need this to use npx with nvm (for the mcp) 
 (use-package nvm
