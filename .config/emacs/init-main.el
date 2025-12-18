@@ -28,39 +28,56 @@
 (setq straight-use-package-by-default t)
 (use-package quelpa-use-package)
 
+(setenv "PATH" (concat (getenv "PATH") ":" (expand-file-name "~/go/bin")))
+(setenv "PATH" (concat (getenv "PATH") ":" (expand-file-name "~/.local/bin")))
+(setq exec-path (append exec-path (list (expand-file-name "~/go/bin"))))
+(setq exec-path (append exec-path (list (expand-file-name "~/.local/bin"))))
+
 (setq use-short-answers t)
-(setq inhibit-startup-message t)    ;; Hide the startup message
+  (setq inhibit-startup-message t)    ;; Hide the startup message
 
-(use-package material-theme)
-(load-theme 'material t)            ;; Load material theme
+  (use-package material-theme)
+  (load-theme 'material t)            ;; Load material theme
 
-(line-number-mode)
-(tool-bar-mode -1)
+  (line-number-mode)
+  (tool-bar-mode -1)
 
-(global-set-key (kbd "M-i") 'imenu)
+  (global-set-key (kbd "M-i") 'imenu)
 
-;; (add-hook 'emacs-startup-hook 'toggle-frame-maximized)
-;; (add-to-list 'default-frame-alist '(fullscreen . maximized))
-;; (when window-system (set-frame-size (selected-frame) 100 50))
-;; (add-to-list 'default-frame-alist '(width . 100))
-;; (add-to-list 'default-frame-alist '(height . 50))
-;;(setq default-frame-alist '((width . 100) (height . 50)))
-(add-hook 'after-make-frame-functions
-      	  (lambda (frame)
-      	    (set-frame-width frame 100)
-      	    (set-frame-height frame 50)))
+  ;; (add-hook 'emacs-startup-hook 'toggle-frame-maximized)
+  ;; (add-to-list 'default-frame-alist '(fullscreen . maximized))
+  ;; (when window-system (set-frame-size (selected-frame) 100 50))
+  ;; (add-to-list 'default-frame-alist '(width . 100))
+  ;; (add-to-list 'default-frame-alist '(height . 50))
+  ;;(setq default-frame-alist '((width . 100) (height . 50)))
+  (add-hook 'after-make-frame-functions
+        	  (lambda (frame)
+        	    (set-frame-width frame 100)
+        	    (set-frame-height frame 50)))
 
-(setq column-number-mode t)
+  (setq column-number-mode t)
 
-(setq dired-dwim-target t)
+  (setq dired-dwim-target t)
 
-(setq ring-bell-function 'ignore)
-;; (setq visible-bell 1)
+  (setq ring-bell-function 'ignore)
+  ;; (setq visible-bell 1)
 
-(setq dired-listing-switches "-alhn")
-;; default is "-al"
-(require 'tramp)
-(require 'tramp-container)
+  (setq dired-listing-switches "-alhn")
+  ;; default is "-al"
+  (require 'tramp)
+  (require 'tramp-container)
+
+  (require 'term)
+(defun my-term-paste (&optional string)
+  "Paste STRING or the kill ring into the terminal."
+  (interactive)
+  (process-send-string
+   (get-buffer-process (current-buffer))
+   (if string string (current-kill 0))))
+
+;; Bind C-y in term-char-mode (term-raw-map)
+(define-key term-raw-map (kbd "C-y") 'my-term-paste)
+(define-key term-raw-map (kbd "M-o") 'ace-window)
 
 (use-package yaml-mode)
 (use-package hcl-mode)
@@ -175,71 +192,93 @@
   (setq git-link-open-in-browser t))
 
 (use-package org
-  :hook
-  (org-mode . visual-line-mode)
-  :config
-  (setf (alist-get "S" org-structure-template-alist nil nil #'string=) "src emacs-lisp")
-  )
+    :hook
+    (org-mode . visual-line-mode)
+    :config
+    (setf (alist-get "S" org-structure-template-alist nil nil #'string=) "src emacs-lisp")
+    )
+
+  (use-package plantuml-mode
+    ;; :ensure t
+    ;; :mode ("\\.puml\\'" "\\.plantuml\\'")
+    :config
+    (setq plantuml-default-exec-mode 'jar) ; or 'executable if installed system-wide
+    (setq plantuml-output-type "png"))
+;; (setq org-plantuml-exec-mode 'plantuml)
+
+(setq plantuml-jar-path (expand-file-name "plantuml.jar" user-emacs-directory))
+;; (plantuml-download-jar)
+(setq plantuml-jar-path (expand-file-name "plantuml.jar" user-emacs-directory))
+(setq org-plantuml-jar-path plantuml-jar-path)
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((plantuml . t))) ; this line activates plantuml
+
+(add-hook 'org-babel-after-execute-hook 'org-display-inline-images)
+
+(setq org-edit-src-content-indentation 0)
 
 ;; Load org-faces to make sure we can set appropriate faces
-  (require 'org-faces)
-  (setq org-hide-emphasis-markers t)
+(require 'org-faces)
+(setq org-hide-emphasis-markers t)
 
-  ;; Set reusable font name variables
-  (defvar my/fixed-width-font "Ubuntu Monospace"
-    "The font to use for monospaced (fixed width) text.")
-
-  (defvar my/variable-width-font "Ubuntu"
-    "The font to use for variable-pitch (document) text.")
-
-  ;; NOTE: These settings might not be ideal for your machine, tweak them as needed!
-  ;; (set-face-attribute 'default nil :font my/fixed-width-font :weight 'light :height 180)
-  ;; (set-face-attribute 'fixed-pitch nil :font my/fixed-width-font :weight 'light :height 190)
-  ;; (set-face-attribute 'variable-pitch nil :font my/variable-width-font :weight 'light :height 1.3)
-
-  ;; (dolist (face '((org-level-1 . 1.2)
-  ;;                 (org-level-2 . 1.1)
-  ;;                 (org-level-3 . 1.05)
-  ;;                 (org-level-4 . 1.0)
-  ;;                 (org-level-5 . 1.1)
-  ;;                 (org-level-6 . 1.1)
-  ;;                 (org-level-7 . 1.1)
-  ;;                 (org-level-8 . 1.1)))
-  ;;   (set-face-attribute (car face) nil :font my/variable-width-font :weight 'medium :height (cdr face)))
-
-  ;; ;; Make the document title a bit bigger
-  ;; (set-face-attribute 'org-document-title nil :font my/variable-width-font :weight 'bold :height 1.3)
-
-  ;; ;; Make sure certain org faces use the fixed-pitch face when variable-pitch-mode is on
-  ;; (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch)
-  ;; (set-face-attribute 'org-table nil :inherit 'fixed-pitch)
-  ;; (set-face-attribute 'org-formula nil :inherit 'fixed-pitch)
-  ;; (set-face-attribute 'org-code nil :inherit '(shadow fixed-pitch))
-  ;; (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
-  ;; (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
-  ;; (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
-  ;; (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch)
-
-
-  (use-package visual-fill-column)
-  (defun dw/org-present-prepare-slide ()
-    (org-overview)
-    (org-show-entry)
-    (org-show-children))
-
-  ;; Set reusable font name variables
+;; Set reusable font name variables
 (defvar my/fixed-width-font "Ubuntu Monospace"
   "The font to use for monospaced (fixed width) text.")
 
 (defvar my/variable-width-font "Ubuntu"
   "The font to use for variable-pitch (document) text.")
 
-  (defun dw/org-present-hook ()
+;; NOTE: These settings might not be ideal for your machine, tweak them as needed!
+;; (set-face-attribute 'default nil :font my/fixed-width-font :weight 'light :height 180)
+;; (set-face-attribute 'fixed-pitch nil :font my/fixed-width-font :weight 'light :height 190)
+;; (set-face-attribute 'variable-pitch nil :font my/variable-width-font :weight 'light :height 1.3)
+
+;; (dolist (face '((org-level-1 . 1.2)
+;;                 (org-level-2 . 1.1)
+;;                 (org-level-3 . 1.05)
+;;                 (org-level-4 . 1.0)
+;;                 (org-level-5 . 1.1)
+;;                 (org-level-6 . 1.1)
+;;                 (org-level-7 . 1.1)
+;;                 (org-level-8 . 1.1)))
+;;   (set-face-attribute (car face) nil :font my/variable-width-font :weight 'medium :height (cdr face)))
+
+;; ;; Make the document title a bit bigger
+;; (set-face-attribute 'org-document-title nil :font my/variable-width-font :weight 'bold :height 1.3)
+
+;; ;; Make sure certain org faces use the fixed-pitch face when variable-pitch-mode is on
+;; (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch)
+;; (set-face-attribute 'org-table nil :inherit 'fixed-pitch)
+;; (set-face-attribute 'org-formula nil :inherit 'fixed-pitch)
+;; (set-face-attribute 'org-code nil :inherit '(shadow fixed-pitch))
+;; (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
+;; (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
+;; (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
+;; (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch)
+
+
+(use-package visual-fill-column)
+(defun dw/org-present-prepare-slide ()
+  (org-overview)
+  (org-show-entry)
+  (org-show-children))
+
+;; Set reusable font name variables
+(defvar my/fixed-width-font "Ubuntu Monospace"
+  "The font to use for monospaced (fixed width) text.")
+
+(defvar my/variable-width-font "Ubuntu"
+  "The font to use for variable-pitch (document) text.")
+
+(defun dw/org-present-hook ()
   (setq-local face-remapping-alist
               '((default (:weight light :height 180))
 		(fixed-pitch (:weight light :height 190))
 		(variable-pitch (:weight light :height 190))
-		(header-line (:height 4 :inherit header-line) variable-pitch)
+		;; (header-line (:height 4 :inherit header-line) variable-pitch)
+		;;(header-line (:height 128))
+		(tab-bar (:inherit tab-bar :height 128 :weight nil))
                 (org-level-1 (:inherit org-level-1 :weight bold :height 1.2))
                 (org-level-2 (:inherit org-level-2 :weight bold :height 1.1))
                 (org-level-3 (:inherit org-level-3 :weight normal :height 1.05))
@@ -258,48 +297,48 @@
                 (org-special-keyword (:inherit (org-special-keyword fixed-pitch)))
                 (org-table (:inherit (org-table fixed-pitch)))
                 (org-verbatim (:inherit '(org-verbatim shadow fixed-pitch)))
-  	      ))
-    (setq
-     ;; visual-fill-column-width 110
-     visual-fill-column-center-text t
-     )
-    (visual-fill-column-mode 1)
-    (setq header-line-format " ")
-    ;; (org-appear-mode -1)
-    (org-display-inline-images)
-    (dw/org-present-prepare-slide)
-    ;; (dw/kill-panel)
-    )
+  		))
+  (setq
+   ;; visual-fill-column-width 110
+   visual-fill-column-center-text t
+   )
+  (visual-fill-column-mode 1)
+  (setq header-line-format " ")
+  ;; (org-appear-mode -1)
+  (org-display-inline-images)
+  (dw/org-present-prepare-slide)
+  ;; (dw/kill-panel)
+  )
 
-  (defun dw/org-present-quit-hook ()
-    ;;(setq-local face-remapping-alist '((default variable-pitch default)))
-    (setq-local face-remapping-alist nil)
-    (setq header-line-format nil)
-    (org-present-small)
-    (org-remove-inline-images)
-    (visual-fill-column-mode 0)
-    ;; (org-appear-mode 1)
-    ;; (dw/start-panel)
-    )
+(defun dw/org-present-quit-hook ()
+  ;;(setq-local face-remapping-alist '((default variable-pitch default)))
+  (setq-local face-remapping-alist nil)
+  (setq header-line-format nil)
+  (org-present-small)
+  (org-remove-inline-images)
+  (visual-fill-column-mode 0)
+  ;; (org-appear-mode 1)
+  ;; (dw/start-panel)
+  )
 
-  (defun dw/org-present-prev ()
-    (interactive)
-    (org-present-prev)
-    (dw/org-present-prepare-slide))
+(defun dw/org-present-prev ()
+  (interactive)
+  (org-present-prev)
+  (dw/org-present-prepare-slide))
 
-  (defun dw/org-present-next ()
-    (interactive)
-    (org-present-next)
-    (dw/org-present-prepare-slide))
+(defun dw/org-present-next ()
+  (interactive)
+  (org-present-next)
+  (dw/org-present-prepare-slide))
 
-  (use-package org-present
-    :bind
-    (:map org-present-mode-keymap
-          ("C-c C-j" . dw/org-present-next)
-          ("C-c C-k" . dw/org-present-prev))
-    :hook
-    ((org-present-mode . dw/org-present-hook)
-     (org-present-mode-quit . dw/org-present-quit-hook)) )
+(use-package org-present
+  :bind
+  (:map org-present-mode-keymap
+        ("C-c C-j" . dw/org-present-next)
+        ("C-c C-k" . dw/org-present-prev))
+  :hook
+  ((org-present-mode . dw/org-present-hook)
+   (org-present-mode-quit . dw/org-present-quit-hook)) )
 
 (defun dd/org-babel-send-src-to-repl (buffer-name)
   "Execute current org src block in named shell or ansi-term buffer."
@@ -357,7 +396,7 @@
      ("duckduckgo" . (:command "uvx" :args ("duckduckgo-mcp-server")))
      ("fetch" . (:command "uvx" :args ("mcp-server-fetch")))
      ("filesystem" . (:command "npx" :args ("-y" "@modelcontextprotocol/server-filesystem")
-      			       :roots ("/home/jpuente/github/")))
+      			       :roots (,(expand-file-name "~/github"))))
      ;; ("sequential-thinking" . (:command "npx" :args ("-y" "@modelcontextprotocol/server-sequential-thinking")))
      ;; ("memory" . (:command "npx" :args ("-y" "@modelcontextprotocol/server-memory")))
      ;; ("github" . (:command "docker"
@@ -398,8 +437,8 @@
   :description "AI coding assistant with filesystem and bash"
   :system "You are an expert programming assistant with access to the filesystem and shell commands."
   :model 'claude-sonnet-4.5
-  :pre (lambda () (gptel-mcp-connect '("duckduckgo" "fetch") t))
-  :tools '("bash" "mcp-duckduckgo" "mcp-fetch")
+  :pre (lambda () (gptel-mcp-connect '("duckduckgo" "fetch" "filesystem") t))
+  :tools '("bash" "mcp-duckduckgo" "mcp-fetch" "mcp-filesystem")
   )
 ;; (gptel--apply-preset 'dev)
 
@@ -414,6 +453,8 @@
 :ensure t
 :config
 (google-this-mode 1))
+
+(use-package transpose-frame)
 
 (use-package vertico
   :custom
