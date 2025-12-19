@@ -5,7 +5,7 @@
 HISTSIZE=100000
 HISTFILESIZE=200000
 
-alias dotfiles='/usr/bin/git --git-dir="${HOME}/.dotfiles/" --work-tree="${HOME}"'
+alias dotfiles='git --git-dir="${HOME}/.dotfiles/" --work-tree="${HOME}"'
 
 if [ -d "$HOME/go/bin" ] ; then
     PATH="$HOME/go/bin:$PATH"
@@ -19,7 +19,8 @@ if [ -d "$HOME/.local/bin" ] ; then
     PATH="$HOME/.local/bin:$PATH"
 fi
 
-source /usr/share/bash-completion/completions/git
+#source /usr/share/bash-completion/completions/git
+[ -d "${HOME}/.guix-profile" ] && source "${HOME}/.guix-profile/share/bash-completion/completions/git" || source "/share/bash-completion/completions/git"
 __git_complete dotfiles __git_main
 
 # pnpm

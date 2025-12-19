@@ -375,7 +375,7 @@
 (use-package nvm
   :straight (:host github :repo "rejeep/nvm.el")
   :config
-  (nvm-use "v25.2.1"))
+  (ignore-errors (nvm-use "v25.2.1")))
 
 (defconst llm-tools-dir
   (expand-file-name "llm-tool-collection/" user-emacs-directory)
